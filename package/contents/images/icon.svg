@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+    <title id="title">Clean Console to UI Icon — Red Glowing Particles</title>
+    <desc id="desc">Minimal terminal window replaced with red glowing particles on a soft circular background.</desc>
+
+    <defs>
+        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#18A0F0"/>
+            <stop offset="1" stop-color="#5C55F8"/>
+        </linearGradient>
+
+        <!-- Soft red glow filter for particles -->
+        <radialGradient id="redCore" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#FF6B6B" stop-opacity="1"/>
+            <stop offset="60%" stop-color="#FF4B4B" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#FF2A2A" stop-opacity="0.0"/>
+        </radialGradient>
+
+        <filter id="glow" x="-75%" y="-75%" width="250%" height="250%" color-interpolation-filters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur2"/>
+            <feMerge>
+                <feMergeNode in="blur2"/>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+
+    <!-- Soft circular backdrop -->
+    <circle cx="256" cy="256" r="232" fill="url(#g)"/>
+
+    <!-- Terminal window (centered) -->
+    <g transform="translate(96,136)">
+        <rect x="0" y="0" width="320" height="240" rx="12" fill="#071025" stroke="#0f1724" stroke-width="3"/>
+        <!-- Top accent bar -->
+        <rect x="0" y="0" width="320" height="36" rx="12" fill="#0b1a2a"/>
+        <!-- control dots (subtle) -->
+        <circle cx="22" cy="18" r="5" fill="#FF5C56"/>
+        <circle cx="44" cy="18" r="5" fill="#FFBD2E"/>
+        <circle cx="66" cy="18" r="5" fill="#27C93F"/>
+
+        <!-- Red glowing particles replacing terminal content -->
+        <g filter="url(#glow)" opacity="0.98">
+            <!-- Core bright blobs (use radial gradient for softer center) -->
+            <circle cx="64"  cy="116" r="4.8" fill="url(#redCore)" />
+            <circle cx="112" cy="74"  r="3.6" fill="url(#redCore)" />
+            <circle cx="160" cy="140" r="18"  fill="url(#redCore)" />
+            <circle cx="216" cy="80"  r="4"   fill="url(#redCore)" />
+            <circle cx="268" cy="118" r="5"   fill="url(#redCore)" />
+            <circle cx="44"  cy="154" r="3.4" fill="url(#redCore)" />
+            <circle cx="122" cy="118" r="2.6" fill="url(#redCore)" />
+            <circle cx="198" cy="130" r="2.8" fill="url(#redCore)" />
+            <circle cx="254" cy="166" r="3.6" fill="url(#redCore)" />
+            <circle cx="92"  cy="194" r="4.2" fill="url(#redCore)" />
+            <circle cx="134" cy="184" r="3"   fill="url(#redCore)" />
+            <circle cx="214" cy="204" r="3.2" fill="url(#redCore)" />
+            <circle cx="232" cy="144" r="4.4" fill="url(#redCore)" />
+            <circle cx="146" cy="96"  r="2.4" fill="url(#redCore)" />
+            <circle cx="180" cy="112" r="2.6" fill="url(#redCore)" />
+            <circle cx="116" cy="154" r="2.6" fill="url(#redCore)" />
+            <circle cx="184" cy="174" r="2.4" fill="url(#redCore)" />
+            <circle cx="150" cy="214" r="3.8" fill="url(#redCore)" />
+        </g>
+
+        <!-- Subtle dim particle centers for depth (no heavy glow) -->
+        <g opacity="0.85" fill="#FF8787">
+            <circle cx="64"  cy="116" r="1.6"/>
+            <circle cx="160" cy="140" r="6"/>
+            <circle cx="268" cy="118" r="1.8"/>
+            <circle cx="214" cy="204" r="1.2"/>
+            <circle cx="112" cy="74"  r="1.2"/>
+        </g>
+    </g>
+
+    <!-- Small sparkle to hint "UI" rendering (clean, single shape) -->
+    <g transform="translate(378,82)" fill="#FFFFFF" opacity="0.92">
+        <path d="M8 0l2.5 6.5L17 8l-6.5 1.5L8 17 6.5 9.5 0 8l6.5-1.5z"/>
+    </g>
+</svg>

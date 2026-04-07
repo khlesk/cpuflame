@@ -1,0 +1,47 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "",
+                "Name": "CPU Flame"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "CPU load and temperature indicator with animated flame effects (Classic, Ember, Plasma styles)",
+        "Description[de]": "CPU-Last- und Temperaturanzeige mit animierten Flammeneffekten (Klassisch, Glut, Plasma)",
+        "Description[es]": "Indicador de carga y temperatura de CPU con efectos de llama animados (Clásico, Ascuas, Plasma)",
+        "Description[fr]": "Indicateur de charge et de température CPU avec effets de flamme animés (Classique, Braise, Plasma)",
+        "Description[hi]": "एनिमेटेड ज्वाला प्रभावों के साथ CPU लोड और तापमान संकेतक (क्लासिक, एम्बर, प्लाज़्मा शैली)",
+        "Description[ja]": "アニメーション炎エフェクト付きのCPU負荷・温度インジケーター（クラシック、エンバー、プラズマ）",
+        "Description[pt]": "Indicador de carga e temperatura da CPU com efeitos de chama animados (Clássico, Brasa, Plasma)",
+        "Description[uk]": "Індикатор навантаження і температури CPU з анімованими ефектами полум'я (Класичний, Жар, Плазма)",
+        "Description[zh_CN]": "带有动画火焰效果的CPU负载与温度指示器（经典、余烬、等离子）",
+        "Icon": "utilities-system-monitor",
+        "Id": "com.github.khlesk.cpuflame",
+        "License": "MIT",
+        "Name": "CPU Flame",
+        "Name[de]": "CPU-Flamme",
+        "Name[es]": "Llama de CPU",
+        "Name[fr]": "Flamme CPU",
+        "Name[hi]": "CPU ज्वाला",
+        "Name[ja]": "CPUフレイム",
+        "Name[pt]": "Chama da CPU",
+        "Name[uk]": "Полум'я CPU",
+        "Name[zh_CN]": "CPU火焰",
+        "Version": "0.1.0"
+    },
+      "X-Widget-Scripts": {
+        "Icons": {
+            "InstalledName": "com.github.khlesk.cpuflame",
+            "PngSource": "contents/images/icon.png",
+            "ScalableSource": "contents/images/icon.svg"
+        },
+        "Source": {
+            "GithubOwner": "khlesk",
+            "GithubRef": "master",
+            "GithubRepo": "cpuflame"
+        }
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
