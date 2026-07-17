@@ -680,6 +680,7 @@ PlasmoidItem {
 
         property real u_time: root.animTime
         property real u_load: root.cpuLoad
+        property real u_temperature: root.tempNorm(root.cpuTemp)
         property real u_showGlow: root.transparentBg ? 0 : 1
         property vector2d u_resolution: Qt.vector2d(Math.max(1, width), Math.max(1, height))
         property vector4d u_baseColor: Qt.vector4d(root.frameColors.base.r, root.frameColors.base.g, root.frameColors.base.b, 1)
@@ -711,6 +712,7 @@ PlasmoidItem {
 
         property real u_time: root.animTime
         property real u_load: root.cpuLoad
+        property real u_temperature: root.tempNorm(root.cpuTemp)
         property real u_showGlow: root.transparentBg ? 0 : 1
         property real u_particleSize: root.particleSize
         property real u_particleCount: Math.min(200, root.cfgParticleCount)
@@ -744,6 +746,7 @@ PlasmoidItem {
 
         property real u_time: root.animTime
         property real u_load: root.cpuLoad
+        property real u_temperature: root.tempNorm(root.cpuTemp)
         property real u_showGlow: root.transparentBg ? 0 : 1
         property real u_particleSize: root.particleSize
         property real u_particleCount: Math.min(200, root.cfgParticleCount)
