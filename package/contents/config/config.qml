@@ -37,5 +37,4 @@ ConfigModel {
         icon: "utilities-system-monitor"
         source: "configGeneral.qml"
     }
-
 }

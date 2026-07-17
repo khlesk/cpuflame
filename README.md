@@ -10,8 +10,6 @@ It works in both places:
 - Plasma panel
 - Plasma desktop
 
-![Screenshot](assets/screen.png)
-
 ## Features
 
 - Flame height follows CPU load.

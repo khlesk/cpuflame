@@ -64,22 +64,22 @@ PlasmoidItem {
     property int particleCount: 0 // active count for quick iteration
     // pre-compute colors once per frame, not per pixel
     property var frameColors: ({
-        "base": {
-            "r": 0,
-            "g": 0.5,
-            "b": 1
-        },
-        "bright": {
-            "r": 0.5,
-            "g": 0.8,
-            "b": 1
-        },
-        "glow": {
-            "r": 0,
-            "g": 0.1,
-            "b": 0.3
-        }
-    })
+            "base": {
+                "r": 0,
+                "g": 0.5,
+                "b": 1
+            },
+            "bright": {
+                "r": 0.5,
+                "g": 0.8,
+                "b": 1
+            },
+            "glow": {
+                "r": 0,
+                "g": 0.1,
+                "b": 0.3
+            }
+        })
     // pre-baked rgba strings updated once per frame
     property string baseRgba: ""
     property string brightRgba: ""
@@ -105,31 +105,31 @@ PlasmoidItem {
     readonly property string tooltipTempText: isNaN(cpuTemp) ? "--" : (Math.round(cpuTemp) + "°C")
     readonly property string localeName: (Qt.locale().name || "en_US").toLowerCase()
     readonly property var tooltipTranslations: ({
-        "zh_CN": {
-            "Load": "负载",
-            "Temp": "温度"
-        },
-        "es": {
-            "Load": "Carga",
-            "Temp": "Temp."
-        },
-        "fr": {
-            "Load": "Charge",
-            "Temp": "Temp."
-        },
-        "hi": {
-            "Load": "लोड",
-            "Temp": "ताप"
-        },
-        "pt": {
-            "Load": "Carga",
-            "Temp": "Temp."
-        },
-        "uk": {
-            "Load": "Навантаження",
-            "Temp": "Темп."
-        }
-    })
+            "zh_CN": {
+                "Load": "负载",
+                "Temp": "温度"
+            },
+            "es": {
+                "Load": "Carga",
+                "Temp": "Temp."
+            },
+            "fr": {
+                "Load": "Charge",
+                "Temp": "Temp."
+            },
+            "hi": {
+                "Load": "लोड",
+                "Temp": "ताप"
+            },
+            "pt": {
+                "Load": "Carga",
+                "Temp": "Temp."
+            },
+            "uk": {
+                "Load": "Навантаження",
+                "Temp": "Темп."
+            }
+        })
     readonly property string overlayText: {
         var parts = [];
         if (showLoadText)
@@ -180,7 +180,7 @@ PlasmoidItem {
     function parsePowerState(output) {
         var v = parseInt(output.trim());
         if (isNaN(v))
-            return ;
+            return;
 
         if (v === 1) {
             if (!onBattery) {
@@ -213,7 +213,7 @@ PlasmoidItem {
     function updateCpuLoadFromSensor(value) {
         var v = parseSensorNumber(value);
         if (isNaN(v))
-            return ;
+            return;
 
         if (v > 1)
             v /= 100;
@@ -225,7 +225,7 @@ PlasmoidItem {
     function updateCpuTempFromSensor(value) {
         var v = parseSensorNumber(value);
         if (isNaN(v))
-            return ;
+            return;
 
         if (v > 1000)
             v /= 1000;
@@ -251,7 +251,7 @@ PlasmoidItem {
 
     function detectNativeTempSensor() {
         if (useTempPathFallback)
-            return ;
+            return;
 
         var rows = sensorListModel.rowCount();
         var firstAnyTemp = "";
@@ -267,7 +267,7 @@ PlasmoidItem {
 
             if (isLikelyCpuTempSensorId(sensorId)) {
                 detectedTempSensorId = sensorId;
-                return ;
+                return;
             }
         }
         if (firstAnyTemp.length > 0)
@@ -285,13 +285,14 @@ PlasmoidItem {
                 detectedSensorPath = userPath;
             else
                 console.warn("CPU Flame: Ignoring invalid sensor path from settings.");
-            return ;
+            return;
         }
         detectNativeTempSensor();
     }
 
     function clearParticles() {
-        for (var i = 0; i < particles.length; i++) particles[i].alive = false
+        for (var i = 0; i < particles.length; i++)
+            particles[i].alive = false;
         particleCount = 0;
     }
 
@@ -310,7 +311,7 @@ PlasmoidItem {
                 p.size = size;
                 p.ptype = ptype || 0;
                 particleCount++;
-                return ;
+                return;
             }
         }
     }
@@ -346,7 +347,8 @@ PlasmoidItem {
 
     function buildAlphaCache() {
         var arr = [];
-        for (var i = 0; i <= 100; i++) arr.push((i / 100).toFixed(2))
+        for (var i = 0; i <= 100; i++)
+            arr.push((i / 100).toFixed(2));
         alphaStringCache = arr;
     }
 
@@ -598,7 +600,7 @@ PlasmoidItem {
 
         engine: "executable"
         connectedSources: []
-        onNewData: function(source, data) {
+        onNewData: function (source, data) {
             var stdout = data["stdout"];
             root.parseCpuTempFile(stdout);
             disconnectSource(source);
@@ -610,7 +612,7 @@ PlasmoidItem {
 
         engine: "executable"
         connectedSources: []
-        onNewData: function(source, data) {
+        onNewData: function (source, data) {
             var stdout = data["stdout"];
             root.parsePowerState(stdout);
             disconnectSource(source);
@@ -645,7 +647,7 @@ PlasmoidItem {
             var usingCanvas = root.useCanvasRenderer;
             // skip if previous paint is still running
             if (usingCanvas && root.painting)
-                return ;
+                return;
 
             var dt = interval / 1000;
             root.animTime += dt;
@@ -1080,7 +1082,7 @@ PlasmoidItem {
             ctx.clearRect(0, 0, w, h);
             if (w < 4 || h < 4) {
                 root.painting = false;
-                return ;
+                return;
             }
             var load = root.cpuLoad;
             var time = root.animTime;
@@ -1095,5 +1097,4 @@ PlasmoidItem {
                 drawPlasma(ctx, w, h, dt, load, time, colors, flameH);
         }
     }
-
 }
