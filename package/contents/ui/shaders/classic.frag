@@ -43,58 +43,86 @@ float fbm(vec2 p) {
     return value;
 }
 
+float tongue(vec2 p, float width, float height, float offset, float lean, float travel, float seed) {
+    float rise = clamp(p.y / height, 0.0, 1.0);
+    float center = offset + lean * rise;
+    float curl = noise(vec2(travel * 4.0, seed)) - 0.5;
+    center += width * (curl * 1.6 + 0.25 * sin(travel * 7.0 + seed)) * rise * rise;
+    float taper = pow(max(1.0 - rise, 0.0), 0.85);
+    float radius = width * taper * mix(0.78, 1.0, smoothstep(0.0, 0.18, rise));
+    float billow = noise(vec2(travel * 8.0, seed + 7.0));
+    radius *= mix(1.0, 0.55 + billow * 0.9, smoothstep(0.05, 0.45, rise));
+    // Measure from the edge in base-width units, so the feathering stays soft
+    // as the tongue narrows instead of collapsing into a sharp outline.
+    float field = (radius - abs(p.x - center)) / max(width, 0.001);
+    return min(field, (height - p.y) * 4.0);
+}
+
 void main() {
     vec2 uv = qt_TexCoord0;
     float load = clamp(u_load, 0.0, 1.0);
-    float time = u_time * mix(0.85, 1.9, load);
+    // Scaling elapsed time by load makes every load change jump in phase.
+    float time = u_time;
 
     // Work in height-relative coordinates so the flame does not stretch with
     // wide panels or desktop widgets.
     float aspect = u_resolution.x / max(u_resolution.y, 1.0);
     float y = 1.0 - uv.y;
-    float flameHeight = mix(0.18, 1.02, pow(load, 0.72));
+    float flameHeight = mix(0.18, 0.88, pow(load, 0.72));
     float heightPosition = y / flameHeight;
     vec2 position = vec2((uv.x - 0.5) * aspect, heightPosition);
+    float travel = position.y - time * 0.45;
 
     // Rising domain-warped noise gives the body coherent rolling eddies rather
     // than making every edge pixel jitter independently.
-    vec2 flow = vec2(position.x * 3.1, position.y * 2.15 - time * 1.35);
-    vec2 warp = vec2(fbm(flow + vec2(0.0, time * 0.17)),
-                     fbm(flow + vec2(5.2, -time * 0.11))) - 0.5;
+    vec2 flow = vec2(position.x * 3.1, travel * 2.15);
+    vec2 warp = vec2(fbm(flow), fbm(flow + vec2(5.2, 1.3))) - 0.5;
     float turbulence = fbm(flow + warp * vec2(1.7, 1.15));
-    float fineTurbulence = noise(flow * 3.3 + vec2(2.0, -time * 2.1));
+    float fineTurbulence = noise(flow * 3.3 + vec2(2.0, 0.0));
 
     // Keep the fuel-rich base steady, then let the centerline lean and curl
     // progressively as hot gases rise.
     float rise = smoothstep(0.0, 0.15, position.y);
-    float centerline = sin(position.y * 5.2 - time * 1.45) * 0.025 * position.y;
-    centerline += (warp.x * 0.16 + sin(position.y * 11.0 + time) * 0.012)
-                  * rise * position.y;
+    float baseWidth = mix(0.065, 0.31, pow(load, 0.55));
+    float centerline = baseWidth * (sin(travel * 5.2) * 0.24
+                                   + warp.x * 0.65) * rise * position.y;
     float localX = position.x - centerline;
 
-    float taper = pow(max(1.0 - position.y * 0.82, 0.0), 0.58);
-    float baseWidth = mix(0.065, 0.31, pow(load, 0.55));
-    float width = baseWidth * mix(0.72, 1.0, rise) * (0.22 + 0.78 * taper);
-    float normalizedDistance = abs(localX) / max(width, 0.001);
+    // Keep one continuous body. Additional tongues grow and dissolve on
+    // independent schedules, with more opportunities to branch at high load.
+    vec2 tonguePosition = vec2(localX, position.y);
+    float mainHeight = 0.86 + 0.12 * noise(vec2(time * 0.28, 3.0));
+    float flameField = tongue(tonguePosition, baseWidth * 0.72, mainHeight,
+                              0.0, baseWidth * 0.12, travel, 0.0);
+    for (int branch = 0; branch < 4; ++branch) {
+        float index = float(branch);
+        float seed = 17.3 + index * 23.7;
+        float activity = noise(vec2(time * 0.32 + seed, seed));
+        activity = smoothstep(0.52, 0.78, activity + load * 0.22)
+                   * smoothstep(0.06 + index * 0.12, 0.35 + index * 0.15, load);
+        float shape = noise(vec2(time * 0.21, seed + 5.0));
+        float height = mix(0.20, 0.50 + shape * 0.42, activity);
+        float width = baseWidth * mix(0.30, 0.52, shape);
+        float offset = baseWidth * (noise(vec2(time * 0.17, seed + 11.0)) - 0.5) * 1.5;
+        float lean = baseWidth * (noise(vec2(time * 0.23, seed + 19.0)) - 0.5) * 0.8;
+        float branchField = tongue(tonguePosition, width, height, offset, lean, travel, seed);
+        // Blend the field so a dormant tongue contributes neither an edge
+        // nor a halo, and its appearance never switches abruptly.
+        flameField = mix(flameField, max(flameField, branchField), activity);
+    }
 
-    float edgeBreakup = (turbulence - 0.5) * mix(0.16, 0.72, rise);
-    edgeBreakup += (fineTurbulence - 0.5) * 0.12 * rise;
-    float flameField = 1.0 - normalizedDistance + edgeBreakup;
-
-    // Carve the upper body into independently moving tongues. This mostly
-    // disappears near idle and becomes visible when there is enough flame.
-    float forkMask = smoothstep(0.48, 0.92, position.y) * smoothstep(0.18, 0.65, load);
-    float forkCenter = centerline + (warp.y - 0.5) * 0.055;
-    float fork = exp(-pow((position.x - forkCenter) / max(width * 0.34, 0.015), 2.0));
-    flameField -= fork * forkMask * (0.22 + 0.34 * turbulence);
+    float edgeBreakup = (turbulence - 0.5) * mix(0.10, 0.32, rise);
+    edgeBreakup += (fineTurbulence - 0.5) * 0.05 * rise;
+    flameField += edgeBreakup;
 
     float verticalMask = smoothstep(-0.025, 0.07, position.y)
-                         * smoothstep(1.12, 0.83, position.y);
-    float outerHeat = smoothstep(-0.22, 0.08, flameField) * verticalMask;
-    float bodyHeat = smoothstep(-0.02, 0.42, flameField) * verticalMask;
-    float coreHeat = smoothstep(0.30, 0.82, flameField)
+                         * (1.0 - smoothstep(0.86, 1.0, position.y));
+    float softness = max(0.18, 1.5 / max(u_resolution.y * baseWidth, 1.0));
+    float outerHeat = smoothstep(-softness * 2.0, softness * 2.0, flameField) * verticalMask;
+    float bodyHeat = smoothstep(-0.12, 0.65, flameField) * verticalMask;
+    float coreHeat = smoothstep(0.12, 0.72, flameField)
                      * smoothstep(0.02, 0.22, position.y)
-                     * smoothstep(0.90, 0.38, position.y);
+                     * (1.0 - smoothstep(0.38, 0.90, position.y));
 
     // Build the color inside the flame instead of tinting its whole body with
     // one temperature color. At low temperature the flame is blue. Yellow
@@ -104,8 +132,7 @@ void main() {
     float yellowAmount = smoothstep(0.20, 0.58, temperature);
     float redAmount = smoothstep(0.64, 0.98, temperature);
 
-    float colorNoise = fbm(vec2(position.x * 7.5 - time * 0.16,
-                                position.y * 3.8 - time * 1.55)
+    float colorNoise = fbm(vec2(position.x * 7.5, travel * 3.8)
                            + warp * 1.4);
     float upperBody = smoothstep(0.12, 0.68, position.y);
     float yellowPattern = smoothstep(0.25, 0.72,
@@ -144,11 +171,13 @@ void main() {
                          * (0.32 + 0.68 * temperature);
     flameColor = mix(flameColor, propaneBlue, blueFuelLine);
 
-    // Retain the darker translucent rim so the distributed colors still read
-    // as a single flame against both transparent and opaque backgrounds.
-    flameColor *= mix(0.48, 1.0, bodyHeat);
-
-    float flameAlpha = outerHeat * (0.30 + 0.70 * bodyHeat);
+    // Translucent gas emits light through a soft envelope. Keep this local
+    // halo on transparent backgrounds too; u_showGlow controls only the base.
+    float density = mix(0.62, 0.88, smoothstep(0.20, 0.75, colorNoise));
+    float flameAlpha = outerHeat * (0.28 + 0.62 * bodyHeat) * density;
+    float haloDistance = max(0.0, 0.12 - flameField) / max(0.55, softness * 2.0);
+    float haloAlpha = 0.16 * exp(-haloDistance * haloDistance) * verticalMask;
+    flameAlpha += haloAlpha * (1.0 - flameAlpha);
     vec3 premultipliedColor = flameColor * flameAlpha;
 
     float glow = 0.0;

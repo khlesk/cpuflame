@@ -20,6 +20,7 @@ PlasmoidItem {
     property real rawCpuTemp: NaN
     // ── smoothed state (lerped each frame) ──
     property real cpuLoad: 0
+    property real visualLoad: 0
     property real cpuTemp: NaN
     property real animTime: 0
     // ── config ──
@@ -654,6 +655,12 @@ PlasmoidItem {
             // smooth interpolation
             var lerpRate = Math.min(1, dt * 3);
             root.cpuLoad += (root.rawCpuLoad - root.cpuLoad) * lerpRate;
+            // Let the effects build gradually and retain heat after a load
+            // drop, without delaying the CPU readout. Exponential smoothing
+            // reaches 90% in 2.3 seconds rising and 4.1 seconds falling.
+            var loadResponseTime = root.rawCpuLoad > root.visualLoad ? 1.0 : 1.8;
+            var visualLoadRate = 1 - Math.exp(-dt / loadResponseTime);
+            root.visualLoad += (root.rawCpuLoad - root.visualLoad) * visualLoadRate;
             if (!isNaN(root.rawCpuTemp)) {
                 if (isNaN(root.cpuTemp))
                     root.cpuTemp = root.rawCpuTemp;
@@ -681,7 +688,7 @@ PlasmoidItem {
         id: classicShader
 
         property real u_time: root.animTime
-        property real u_load: root.cpuLoad
+        property real u_load: root.visualLoad
         property real u_temperature: root.tempNorm(root.cpuTemp)
         property real u_showGlow: root.transparentBg ? 0 : 1
         property vector2d u_resolution: Qt.vector2d(Math.max(1, width), Math.max(1, height))
@@ -713,7 +720,7 @@ PlasmoidItem {
         id: emberShader
 
         property real u_time: root.animTime
-        property real u_load: root.cpuLoad
+        property real u_load: root.visualLoad
         property real u_temperature: root.tempNorm(root.cpuTemp)
         property real u_showGlow: root.transparentBg ? 0 : 1
         property real u_particleSize: root.particleSize
@@ -747,7 +754,7 @@ PlasmoidItem {
         id: plasmaShader
 
         property real u_time: root.animTime
-        property real u_load: root.cpuLoad
+        property real u_load: root.visualLoad
         property real u_temperature: root.tempNorm(root.cpuTemp)
         property real u_showGlow: root.transparentBg ? 0 : 1
         property real u_particleSize: root.particleSize
