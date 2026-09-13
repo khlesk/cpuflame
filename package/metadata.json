@@ -28,7 +28,7 @@
         "Name[pt]": "Chama da CPU",
         "Name[uk]": "Полум'я CPU",
         "Name[zh_CN]": "CPU火焰",
-        "Version": "0.2.0"
+        "Version": "0.3.0"
     },
       "X-Widget-Scripts": {
         "Icons": {

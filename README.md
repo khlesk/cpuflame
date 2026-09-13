@@ -4,6 +4,12 @@
 
 <h1 align="center">CPU Flame</h1>
 
+<p align="center">
+  <img src="assets/cpuflame3.gif" alt="CPU Flame animation">
+</p>
+
+<hr/>
+
 CPU Flame is a KDE Plasma 6 widget that shows CPU load and temperature as an animated flame.
 
 It works in both places:
